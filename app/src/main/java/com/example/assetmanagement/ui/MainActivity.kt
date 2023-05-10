@@ -104,7 +104,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         super.onCreate(savedInstanceState)
         init()
         getIntentData()
-        //getLocalData()
+        getLocalData()
     }
 
     private fun getLocalData() {
@@ -265,6 +265,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             override fun onRowEdit(cell: Int, row: Int, singleRow: SingleRow) {
                 listItem[row].singleRowList[cell].value = singleRow.value
                 viewModel.setUpdateDataCell(cell, row, singleRow.value.toString())
+                lifecycleScope.launch {
+                    viewModel.excelDataListLiveData.value?.get(row)
+                        ?.let { viewModel.updateLocal(viewModel.filename, row, it) }
+                }
             }
         })
         binding.recyclerView.adapter = adapter
@@ -385,9 +389,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 adapter?.setData(this)
 
                 lifecycleScope.launch {
-                    //viewModel.saveToLocal(viewModel.filename, listItem)
+                    viewModel.saveToLocal(viewModel.filename, listItem)
                 }
-
 
                 checkForNoData()
                 hideProgress()

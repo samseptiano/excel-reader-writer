@@ -197,10 +197,15 @@ class ExcellReaderViewModel @Inject constructor(
     suspend fun getLocal(cellId: Int?, fileName: String?) = withContext(Dispatchers.IO) {
         val params = GetAllItemUseCase.Params(cellId, fileName)
         val result = getAllItemUseCase.run(params)
+        Log.d("data raw dari room",result.toString())
 
         if (result.isNotEmpty()) {
             val groupedRow = result.groupBy { it.rowSequence }
+            Log.d("data groupedRow",groupedRow.toString())
+
             val groupSizes = groupedRow.size
+            Log.d("data groupSizes",groupSizes.toString())
+
             val firstRow = arrayListOf<String>()
             list.clear()
             for (i in 0 until groupSizes) {
@@ -218,6 +223,7 @@ class ExcellReaderViewModel @Inject constructor(
                 }
             }
 
+            Log.d("data dari room",list.toString())
             excelDataListLiveData.postValue(list)
             excellFirstRowData.postValue(firstRow)
         }
