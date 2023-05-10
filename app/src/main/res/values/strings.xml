@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Asset Management</string>
+    <string name="with_poi_lib">Open With Apache POI</string>
+    <string name="welcome_text">Welcome Excel Reader</string>
+    <string name="or_tag">OR</string>
+    <string name="submit_button">Go</string>
+    <string name="no_data_found">No data found</string>
+    <string name="open_file">Open File</string>
+    <string name="scan_button">Scan Button</string>
+    <string name="fab_descr">Open File</string>
+    <string name="submit">Submit</string>
+    <string name="paste_url_here">Paste URL or Scan</string>
+    <string name="excel_reader">Excel Reader</string>
+    <string name="recent">Recent Files</string>
+    <string name="line_1">line 1</string>
+    <string name="line_2">line 2</string>
+    <string name="password">password</string>
+    <string name="export">Export Data</string>
+    <string name="delete">Delete</string>
+    <string name="update">Update</string>
+    <string name="cancel">Cancel</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="enter_password_desc">This File is Password Protected. Enter Password to Open</string>
+    <string name="err_password_empty">Password Field is Empty.</string>
+    <string name="err_password_incorrect">Password is incorrect.</string>
+    <string name="err_password_correct">Password is Correct.</string>
+    <string name="err_invalid_file_selected">Invalid File Selected</string>
+    <string name="err_file_too_big">File Size Too Big</string>
+
+
+    <string name="sample_receiver_email">samuel.septiano@rodamas.com</string>
+    <string name="sample_receiver_title">Exported Excel File</string>
+    <string name="sample_receiver_message">Dear %1$s,\n\nI will send this %2$s  files to you.\n Thank You.</string>
+    <string name="sample_exported_filename">%1$s Exported-Asset</string>
+
+    <string name="file_is_downloading">The File is Downloading…</string>
+    <string name="data_exported_successfully">Data berhasil di Export!</string>
+
+    Data berhasil di Export!
+
+</resources>

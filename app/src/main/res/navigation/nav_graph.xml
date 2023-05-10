@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.assetmanagement.ui.fragment.HomeFragment"
+        android:label="Home Menu"
+        tools:layout="@layout/fragment_home"/>
+
+    <fragment
+        android:id="@+id/itemFragment"
+        android:name="com.example.assetmanagement.ui.fragment.ItemFragment"
+        android:label="Item List Menu"
+        tools:layout="@layout/fragment_item"/>
+
+    <fragment
+        android:id="@+id/customerFragment"
+        android:name="com.example.assetmanagement.ui.fragment.CustomerFragment"
+        android:label="Customer List Menu"
+        tools:layout="@layout/fragment_customer"/>
+
+    <fragment
+        android:id="@+id/salesFragment"
+        android:name="com.example.assetmanagement.ui.fragment.SalesFragment"
+        android:label="Sales List Menu"
+        tools:layout="@layout/fragment_sales"/>
+
+
+    <fragment
+        android:id="@+id/addNewSalesFragment"
+        android:name="com.example.assetmanagement.ui.fragment.add_new_sales_fragment.AddNewSalesFragment"
+        android:label="Add New Sales Menu"
+        tools:layout="@layout/fragment_add_new_sales">
+        <action
+            android:id="@+id/action_addNewSalesFragment_to_chooseItemFragment"
+            app:destination="@id/chooseItemFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/chooseItemFragment"
+        android:name="com.example.assetmanagement.ui.fragment.add_new_sales_fragment.ChooseItemFragment"
+        android:label="Choose New Item Menu"
+        tools:layout="@layout/fragment_choose_new_item">
+        <argument
+            android:name="salesDate"
+            app:argType="string"
+            android:defaultValue=""/>
+        <argument
+            android:name="customer"
+            app:argType="string"
+            android:defaultValue=""/>
+        <action
+            android:id="@+id/action_chooseItemFragment_to_reviewItemFragmentt"
+            app:destination="@id/reviewItemFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/reviewItemFragment"
+        android:name="com.example.assetmanagement.ui.fragment.add_new_sales_fragment.ReviewItemFragment"
+        android:label=" Review Add Sales Menu"
+        tools:layout="@layout/fragment_review_item">
+        <argument
+            android:name="salesDate"
+            app:argType="string"
+            android:defaultValue=""/>
+        <argument
+            android:name="customer"
+            app:argType="string"
+            android:defaultValue=""/>
+        <argument
+            android:name="item"
+            app:argType="string"
+            android:defaultValue=""/>
+
+        <action
+            android:id="@+id/action_reviewItemFragment_to_salesFragment"
+            app:destination="@id/homeFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/homeFragment"
+            app:popUpToInclusive="true" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/salesDetailFragment"
+        android:name="com.example.assetmanagement.ui.fragment.SalesDetailFragment"
+        android:label=" Sales Detail Menu"
+        tools:layout="@layout/fragment_sales_detail">
+        <argument
+            android:name="salesDate"
+            app:argType="string"
+            android:defaultValue=""/>
+        <argument
+            android:name="customer"
+            app:argType="string"
+            android:defaultValue=""/>
+        <argument
+            android:name="salesId"
+            app:argType="string"
+            android:defaultValue=""/>
+    </fragment>
+
+</navigation>

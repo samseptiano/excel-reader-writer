@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorTransparentWhite"
+    tools:context=".ui.MainActivity">
+
+<!--    <EditText-->
+<!--        android:id="@+id/editText"-->
+<!--        android:layout_width="210dp"-->
+<!--        android:layout_height="60dp"-->
+<!--        android:visibility="gone"-->
+<!--        android:layout_marginLeft="15dp"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:background="@drawable/textview_bg"-->
+<!--        android:hint="@string/paste_url_here" />-->
+<!--    <ImageButton-->
+<!--        android:id="@+id/qrCode_Scan"-->
+<!--        android:layout_width="70dp"-->
+<!--        android:layout_height="60dp"-->
+<!--        android:layout_marginStart="20dp"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:layout_marginEnd="7dp"-->
+<!--        android:visibility="gone"-->
+<!--        android:layout_toEndOf="@+id/editText"-->
+<!--        android:accessibilityPaneTitle="Scan QR Code"-->
+<!--        android:background="@drawable/textview_bg"-->
+<!--        android:contentDescription="@string/scan_button"-->
+<!--        android:src="@drawable/ic_scan"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        tools:ignore="MissingConstraints"-->
+<!--        tools:layout_editor_absoluteY="239dp" />-->
+<!--    <ImageButton-->
+<!--        android:id="@+id/submit_button"-->
+<!--        android:layout_width="70dp"-->
+<!--        android:layout_height="60dp"-->
+<!--        android:layout_marginStart="10dp"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:layout_marginEnd="15dp"-->
+<!--        android:layout_toEndOf="@+id/qrCode_Scan"-->
+<!--        android:background="@drawable/textview_bg"-->
+<!--        android:src="@drawable/ic_baseline_arrow_forward_ios_24"-->
+<!--        android:text="@string/submit_button"-->
+<!--        android:visibility="gone"-->
+<!--        android:textColor="@color/colorWhite" />-->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:clipToPadding="false"
+        tools:itemCount="30"
+        android:padding="4dp"
+        android:layout_marginBottom="@dimen/_70sdp"
+        tools:listitem="@layout/custom_layout" />
+
+
+    <include
+        android:id="@+id/llNoDataFound"
+        layout="@layout/layout_nodatafound"
+        android:layout_width="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="wrap_content" />
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/selectFile"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="@dimen/_16sdp"
+        android:layout_marginBottom="@dimen/_16sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:contentDescription="@string/fab_descr"
+        android:src="@drawable/ic_baseline_add_24" />
+
+
+    <Button
+        android:visibility="gone"
+        android:id="@+id/btn_files"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/_16sdp"
+        android:text="@string/recent"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btn_export"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/colorAccent"
+        app:layout_constraintStart_toEndOf="@id/btn_files"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/_16sdp"
+        android:text="@string/export"
+        android:textAllCaps="false"/>
+
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="@dimen/_36sdp"
+        android:layout_height="@dimen/_36sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

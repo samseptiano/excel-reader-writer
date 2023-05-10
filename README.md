@@ -1,2 +1,1 @@
-# excel-reader-writer
- excel reader and writer written in kotlin
+# application excel writer and reader
