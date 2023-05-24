@@ -27,6 +27,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.assetmanagement.R
 import com.example.assetmanagement.base.ui.BaseActivity
 import com.example.assetmanagement.data.model.ListItems
@@ -37,14 +38,21 @@ import com.example.assetmanagement.ui.adapter.ListItemAdapter
 import com.example.assetmanagement.ui.viewmodel.ExcellReaderViewModel
 import com.example.assetmanagement.utils.Constant
 import com.example.assetmanagement.utils.Constant.Companion.PATH_IMPORT_EXCEL
+import com.example.assetmanagement.utils.callUCropSquare
 import com.example.assetmanagement.utils.copyFileAndExtract
 import com.example.assetmanagement.utils.createXlsx
+import com.example.assetmanagement.utils.enableStrictMode
+import com.example.assetmanagement.utils.generatePDF
 import com.example.assetmanagement.utils.getExtension
+import com.example.assetmanagement.utils.getTempImageUri
+import com.example.assetmanagement.utils.getTmpFileUri
 import com.example.assetmanagement.utils.isFileEncrypt
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
+import com.yalantis.ucrop.UCrop
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -59,6 +67,29 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private var url: String? = null
     private val listItem = arrayListOf<ListItems>()
     private lateinit var menu: Menu
+    private var isFromInit = true
+    private var latestTmpUri: Uri? = null
+
+    private var editedCell: Int = -1
+    private var editedRow: Int = -1
+    private var editedSingleRow: SingleRow? = null
+
+
+    private val galleryPicker =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let { imageUri ->
+                callUCropSquare(imageUri, getTempImageUri())
+            }
+        }
+
+    private val photoPicker =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
+            if (isSuccess) {
+                latestTmpUri?.let { uri ->
+                    callUCropSquare(uri, getTempImageUri())
+                }
+            }
+        }
 
     private val documentPickResultContract =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { result ->
@@ -93,19 +124,39 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private val requestPermission =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach { _ ->
-                openDocument()
+                if (!isFromInit) {
+                    openDocument()
+                }
             }
         }
+
 
     override fun inflateLayout(layoutInflater: LayoutInflater): ActivityMainBinding =
         ActivityMainBinding.inflate(layoutInflater)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableStrictMode()
         init()
         getIntentData()
         getLocalData()
+
     }
+
+
+    private fun pickImage() {
+        galleryPicker.launch("image/*")
+    }
+
+    private fun takeImage() {
+        lifecycleScope.launchWhenStarted {
+            this@MainActivity.getTmpFileUri().let { uri ->
+                latestTmpUri = uri
+                photoPicker.launch(uri)
+            }
+        }
+    }
+
 
     private fun getLocalData() {
         lifecycleScope.launch {
@@ -132,6 +183,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     private fun init() {
+        checkForStoragePermission(true)
         viewModel = ViewModelProvider(this)[ExcellReaderViewModel::class.java]
         viewModel.fileDir = File(this.filesDir, Constant.DOC)
         if (intent.extras?.containsKey(PATH_IMPORT_EXCEL) == true) {
@@ -166,9 +218,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     private fun setupClickListener() {
-        val fab = binding.selectFile
-        fab.setOnClickListener {
-            checkForStoragePermission()
+        binding.selectFile.setOnClickListener {
+            isFromInit = false
+            checkForStoragePermission(false)
         }
 
         binding.btnExport.apply {
@@ -195,47 +247,43 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
 
         btnSend.setOnClickListener {
-            val attachmentFile = this@MainActivity.createXlsx(
-                getString(
-                    R.string.sample_exported_filename,
-                    edtSenderName.text.toString()
-                ),
-                listItem
-            )
+            val attachment = arrayListOf<File>()
+            lifecycleScope.launch {
+                this@MainActivity.generatePDF(
+                    getString(
+                        R.string.sample_exported_filename,
+                        edtSenderName.text.toString()
+                    ),
+                    listItem
+                )?.let { it1 -> attachment.add(it1) }
 
-            val listReceiverEmail = arrayListOf<String>()
-            if (edtReceiverEmail.text.toString().contains(",")) {
+
+                this@MainActivity.createXlsx(
+                    getString(
+                        R.string.sample_exported_filename,
+                        edtSenderName.text.toString()
+                    ),
+                    listItem
+                )?.let { it1 -> attachment.add(it1) }
+
+
+                val listReceiverEmail = arrayListOf<String>()
                 val list = edtReceiverEmail.text.toString().split(",")
                 list.map {
                     listReceiverEmail.add(it)
                 }
-            }
-            attachmentFile?.let {
 
                 sendToEmail(
                     listReceiverEmail,
                     edtEmailTitle.text.toString(),
                     edtEmailBody.text.toString(),
-                    it
+                    attachment
                 )
-
-
-//                sendToEmail(
-//                    arrayOf(getString(R.string.sample_receiver_email)),
-//                    getString(R.string.sample_receiver_title),
-//                    getString(
-//                        R.string.sample_receiver_message,
-//                        getString(R.string.sample_receiver_email),
-//                        getString(R.string.sample_exported_filename)
-//                    ),
-//                    it
-//                )
             }
+
         }
         dialog.setCancelable(true)
-
         dialog.setContentView(view)
-
         dialog.show()
     }
 
@@ -270,7 +318,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         ?.let { viewModel.updateLocal(viewModel.filename, row, it) }
                 }
             }
-        })
+        },
+            object : ExcelCellImageListener {
+                override fun onCellImageEdit(row: Int, cell: Int, singleRow: SingleRow) {
+                    editedCell = cell
+                    editedRow = row
+                    editedSingleRow = singleRow
+                    pickImage()
+                }
+            })
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.setHasFixedSize(true)
@@ -324,16 +380,30 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         try {
-            val result: IntentResult =
-                IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-            if (result.contents == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+                val resultUri = UCrop.getOutput(data!!)
+                listItem[editedRow].singleRowList[editedCell].value = resultUri?.path
+                adapter?.notifyItemChanged(editedRow)
+            } else if (resultCode == UCrop.RESULT_ERROR) {
+                val cropError = UCrop.getError(data!!)
+                Toast.makeText(
+                    this,
+                    "Error While Cropped Image: ${cropError.toString()}",
+                    Toast.LENGTH_LONG
+                ).show();
             } else {
-                url = result.contents
-                setScanResultToSearch()
-                Toast.makeText(this, "Scanned: " + result.contents, Toast.LENGTH_SHORT).show();
+                val result: IntentResult =
+                    IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+                if (result.contents == null) {
+                    Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                } else {
+                    url = result.contents
+                    setScanResultToSearch()
+                    Toast.makeText(this, "Scanned: " + result.contents, Toast.LENGTH_SHORT).show();
+                }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+//            Toast.makeText(this, "Error: $e", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -389,7 +459,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 adapter?.setData(this)
 
                 lifecycleScope.launch {
-                    viewModel.saveToLocal(viewModel.filename, listItem)
+                    try {
+                        viewModel.saveToLocal(viewModel.filename, listItem)
+                    } catch (e: Exception) {
+                        cancel()
+                    }
+
                 }
 
                 checkForNoData()
@@ -420,36 +495,65 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         receiver: ArrayList<String>,
         subject: String,
         body: String,
-        attachmentFile: File
+        attachmentFile: ArrayList<File>
     ) {
         try {
-            Intent(Intent.ACTION_SEND).apply {
+            startActivity(Intent(Intent.ACTION_SEND_MULTIPLE).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_EMAIL, receiver)
                 putExtra(Intent.EXTRA_SUBJECT, subject)
                 putExtra(Intent.EXTRA_TEXT, body)
-                val uri = FileProvider.getUriForFile(
-                    this@MainActivity,
-                    applicationContext.packageName + ".provider",
-                    attachmentFile
-                )
 
-                putExtra(Intent.EXTRA_STREAM, uri)
-            }
+                val files = ArrayList<Uri>()
+
+                for (path in attachmentFile) {
+                    val uri = FileProvider.getUriForFile(
+                        this@MainActivity,
+                        applicationContext.packageName + ".provider",
+                        path
+                    )
+                    files.add(uri)
+                }
+
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
+            })
         } catch (t: Throwable) {
-            Toast.makeText(this, "Error :  ${t.toString()}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "An error occurred :  ${t.toString()}", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun checkForStoragePermission() {
+    private fun checkForStoragePermission(isFromInit: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                requestPermission.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(
+                    Manifest.permission.MANAGE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_DENIED
+
+            ) {
+                requestPermission.launch(
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA
+
+                    )
+                )
             } else {
-                openDocument()
+                if (!isFromInit) {
+                    openDocument()
+                }
             }
         } else {
-            openDocument()
+            if (!isFromInit) {
+                openDocument()
+            }
         }
     }
 

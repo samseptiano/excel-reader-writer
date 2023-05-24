@@ -52,19 +52,25 @@ class ExcellReaderViewModel @Inject constructor(
         list.clear()
         file = File(filePath)
         filename = file.name
-        context.readExcelFileFromAssets(coroutineScope, filePath, password, {
-            excelExceptionListData.postValue(it)
-        }, { lists, firstRow ->
-            list.addAll(lists)
-            excelDataListLiveData.postValue(list)
-            excellFirstRowData.postValue(firstRow)
+        viewModelScope.launch {
+            context.readExcelFileFromAssets(coroutineScope, filePath, password, {
+                excelExceptionListData.postValue(it)
+            }, { lists, firstRow ->
+                list.clear()
+                list.addAll(lists)
+                excelDataListLiveData.postValue(list)
+                excellFirstRowData.postValue(firstRow)
 
-            viewModelScope.launch(Dispatchers.IO) {
-                deleteLocal(null, null)
-            }
+                viewModelScope.launch(Dispatchers.IO) {
+                    deleteLocal(null, null)
+                }
 
-        })
+            })
+        }
+
+
     }
+
     fun sortBy(sortBy: String) {
         launch {
             try {
@@ -75,7 +81,7 @@ class ExcellReaderViewModel @Inject constructor(
                                 it.name == sortBy
                             }?.value?.lowercase()
                         }
-                    }.sortedWith(compareBy{ it.filterItem })
+                    }.sortedWith(compareBy { it.filterItem })
                 excelDataListLiveData.postValue(filtered)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -197,14 +203,14 @@ class ExcellReaderViewModel @Inject constructor(
     suspend fun getLocal(cellId: Int?, fileName: String?) = withContext(Dispatchers.IO) {
         val params = GetAllItemUseCase.Params(cellId, fileName)
         val result = getAllItemUseCase.run(params)
-        Log.d("data raw dari room",result.toString())
+        Log.d("data raw dari room", result.toString())
 
         if (result.isNotEmpty()) {
             val groupedRow = result.groupBy { it.rowSequence }
-            Log.d("data groupedRow",groupedRow.toString())
+            Log.d("data groupedRow", groupedRow.toString())
 
             val groupSizes = groupedRow.size
-            Log.d("data groupSizes",groupSizes.toString())
+            Log.d("data groupSizes", groupSizes.toString())
 
             val firstRow = arrayListOf<String>()
             list.clear()
@@ -223,7 +229,7 @@ class ExcellReaderViewModel @Inject constructor(
                 }
             }
 
-            Log.d("data dari room",list.toString())
+            Log.d("data dari room", list.toString())
             excelDataListLiveData.postValue(list)
             excellFirstRowData.postValue(firstRow)
         }

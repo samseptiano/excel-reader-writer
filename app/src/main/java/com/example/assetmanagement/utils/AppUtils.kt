@@ -30,7 +30,11 @@ fun String.shortStringLength(): String {
     return calStr
 }
 
-fun View.showSnackBar(message: String, action: String = "", actionListener: () -> Unit = {}): Snackbar {
+fun View.showSnackBar(
+    message: String,
+    action: String = "",
+    actionListener: () -> Unit = {}
+): Snackbar {
     val snackbar = Snackbar.make(this, message, Snackbar.LENGTH_SHORT)
     if (action != "") {
         snackbar.duration = Snackbar.LENGTH_INDEFINITE
@@ -44,7 +48,8 @@ fun View.showSnackBar(message: String, action: String = "", actionListener: () -
 }
 
 fun EditText.hideKeyboard() {
-    val keyboard: InputMethodManager? = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+    val keyboard: InputMethodManager? =
+        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
     keyboard?.hideSoftInputFromWindow(windowToken, 0)
 }
 
@@ -53,7 +58,7 @@ fun EditText.typingListener(delay: Long = 1000L, onTypingRun: (String) -> Unit) 
 
     this.addTextChangedListener(object : TextWatcher {
         override fun afterTextChanged(s: Editable) {
-            if(!this@typingListener.hasFocus()) return
+            if (!this@typingListener.hasFocus()) return
             timer.cancel()
             timer = Timer()
             timer.schedule(object : TimerTask() {
@@ -62,7 +67,15 @@ fun EditText.typingListener(delay: Long = 1000L, onTypingRun: (String) -> Unit) 
                 }
             }, delay)
         }
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int){}
+
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
     })
+
+
+}
+
+fun String.isNumeric(): Boolean {
+    val regex = "-?[0-9]+(\\.[0-9]+)?".toRegex()
+    return this.matches(regex)
 }

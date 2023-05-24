@@ -1,13 +1,16 @@
 package com.example.assetmanagement.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.assetmanagement.data.model.ListItems
 import com.example.assetmanagement.data.model.SingleRow
 import com.example.assetmanagement.databinding.CellListitemBinding
 import com.example.assetmanagement.ui.ExcelCellEditListener
+import com.example.assetmanagement.ui.ExcelCellImageListener
 import com.example.assetmanagement.ui.ExcelRowClickListener
 import com.example.assetmanagement.ui.ExcelRowEditListener
 
@@ -15,7 +18,8 @@ import com.example.assetmanagement.ui.ExcelRowEditListener
 class ListItemAdapter(
     private val exampleList: ArrayList<ListItems>,
     private val listener: ExcelRowClickListener,
-    private val editListener: ExcelRowEditListener
+    private val editListener: ExcelRowEditListener,
+    private val editImageListener: ExcelCellImageListener
 
 ) :
     RecyclerView.Adapter<ListItemAdapter.ExampleViewHolder>() {
@@ -96,7 +100,28 @@ class ListItemAdapter(
                         singleRow
                     )
                 }
+            },
+            object : ExcelCellImageListener {
+                override fun onCellImageEdit(row:Int, cell: Int, singleRow: SingleRow) {
+                    editImageListener.onCellImageEdit(position,cell, singleRow)
+                }
+
             })
+
+        val idSAP = currentItem.singleRowList.filter { p -> p.name.contains("SAP", true) }
+        holder.binding.textViewTitle.apply {
+            if (idSAP.isNotEmpty()) {
+                text = idSAP[0].value
+            }
+            setOnClickListener {
+                if (holder.binding.recyclerView.isVisible) {
+                    holder.binding.recyclerView.visibility = View.GONE
+                } else {
+                    holder.binding.recyclerView.visibility = View.VISIBLE
+                }
+            }
+        }
+
         holder.binding.recyclerView.adapter = adapter
 //        if (currentItem.singleRowList.last().value.equals(Constant.FLAG_COMPLETE)) {
 //            holder.binding.oneRowCard.setBackgroundColor(Color.YELLOW)

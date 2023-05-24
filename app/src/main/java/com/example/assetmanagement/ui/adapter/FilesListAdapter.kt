@@ -11,6 +11,7 @@ import com.example.assetmanagement.data.model.ExcellFile
 import com.example.assetmanagement.databinding.ListViewBinding
 import com.example.assetmanagement.ui.FilesListActivity
 import com.example.assetmanagement.ui.MainActivity
+import com.example.assetmanagement.utils.Constant.Companion.PATH_IMPORT_EXCEL
 import java.io.File
 
 class FilesListAdapter(private val context: Context) :
@@ -55,7 +56,7 @@ class FilesListAdapter(private val context: Context) :
 
     private fun openFile(path: String) {
         val intent = Intent(context, MainActivity::class.java)
-        intent.putExtra("excellPath", path)
+        intent.putExtra(PATH_IMPORT_EXCEL, path)
         context.startActivity(intent)
 
     }

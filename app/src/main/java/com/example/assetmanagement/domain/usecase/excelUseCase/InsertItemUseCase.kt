@@ -1,8 +1,9 @@
 package com.example.assetmanagement.domain.usecase.excelUseCase
 
-import com.example.assetmanagement.data.repository.datasource.RoomDataSource
+import android.util.Log
 import com.example.assetmanagement.base.domain.usecase.BaseUseCase
 import com.example.assetmanagement.data.model.ListItems
+import com.example.assetmanagement.data.repository.datasource.RoomDataSource
 import com.example.assetmanagement.domain.database.CrudDatabase
 import javax.inject.Inject
 
@@ -22,7 +23,11 @@ class InsertItemUseCase @Inject constructor(
         params.listItem.mapIndexed { index, listItems ->
             listItems.singleRowList.map { itSingle ->
                 itSingle.id = id + 1
-                repository.insertCell(params.filename, index, itSingle)
+                try {
+                    repository.insertCell(params.filename, index, itSingle)
+                } catch (e: Exception) {
+                    Log.e("error: insert to room", e.toString())
+                }
                 id++
             }
         }

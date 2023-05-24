@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
+    android:id="@+id/ll_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -38,4 +39,11 @@
         app:layout_constraintStart_toEndOf="@id/text_view1"
         android:textColor="@color/black"
         android:textSize="16sp" />
+<androidx.appcompat.widget.AppCompatImageView
+    android:id="@+id/iv_image_link"
+    android:layout_width="match_parent"
+    android:visibility="gone"
+    android:layout_height="@dimen/_150sdp"
+    android:layout_weight="1"/>
+
 </LinearLayout>
